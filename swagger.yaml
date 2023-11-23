@@ -1,13 +1,13 @@
 openapi: 3.0.0
 info:
-  description: "SIMEX Scala Template"
+  description: "Simex Collection Point API"
   version: 1.0.0
-  title: SIMEX Template API
+  title: SIMEX Collection Point API
 tags:
   - name: healthcheck
     description: Healthcheck API
-  - name: Auth
-    description: Authenticates User Endpoint
+  - name: collectionpoint
+    description: Collection Point Service endpoint
 
 paths:
   /:
@@ -25,6 +25,35 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HealthResponse"
+  /collection-point:
+    post:
+      tags:
+        - collectionpoint
+      x-jvm-package: collectionpoint
+      summary: Collection Point endpoint
+      description: Collection Point endpoint for all requests
+      operationId: colllectPointRequest
+      requestBody:
+        description: a SIMEX message
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SimexMessage'
+      responses:
+        '200':
+          description: Ok
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SimexMessage'
+        '204':
+          description: No Content (Response for the request) available
+        '400':
+          description: bad request
+        '503':
+          description: there is a problem handling this request - something is not available
+
 
 components:
   schemas:
@@ -36,3 +65,101 @@ components:
           enum: [ OK, BROKEN ]
       required:
         - serviceStatus
+
+    SimexMessage:
+      type: object
+      properties:
+        endpoint:
+          $ref: '#/components/schemas/EndPoint'
+        client:
+          $ref: '#/components/schemas/Client'
+        originator:
+          $ref: '#/components/schemas/Originator'
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/Datum'
+      required:
+        - endpoint
+        - client
+        - originator
+        - data
+
+    EndPoint:
+      type: object
+      properties:
+        resource:
+          type: string
+          description: the endpoint resource
+        method:
+          type: string
+          description: the call type
+        entity:
+          type: string
+          description: optional business entity
+      required:
+        - resource
+        - method
+
+    Client:
+      type: object
+      properties:
+        clientId:
+          type: string
+          description: the client identifying string
+        requestId:
+          type: string
+          description: the request id
+        sourceEndpoint:
+          type: string
+          description: the client's endpoint from with the call was made
+        authorization:
+          type: string
+          description: the authentication/authorization token
+      required:
+        - clientId
+        - requestId
+        - sourceEndpoint
+        - authorization
+
+    Originator:
+      type: object
+      properties:
+        clientId:
+          type: string
+          description: the client ID of the originator that started the COE
+        requestId:
+          type: string
+          description: the request Id of the originator that started the COE
+        sourceEndpoint:
+          type: string
+          description: the endpoint of the originator that started this COE
+        originalToken:
+          type: string
+          description: security token used to make the request
+        security:
+          type: string
+          description: the client-defined security level to apply
+      required:
+        - clientId
+        - requestId
+        - sourceEndpoint
+        - originalToken
+        - security
+
+    Datum:
+      type: object
+      properties:
+        field:
+          type: string
+          description: the name of the field
+        value:
+          type: string
+          description: the value to evaluate
+        check:
+          type: string
+          description: the check or type of operation for the evaluation
+      required:
+        - field
+        - value
+

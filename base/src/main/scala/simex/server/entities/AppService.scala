@@ -1,8 +1,13 @@
 package simex.server.entities
 
+import dev.profunktor.fs2rabbit.interpreter.RabbitClient
+import dev.profunktor.fs2rabbit.model.AMQPChannel
 import org.http4s.server.Server
+import simex.rabbitmq.consumer.SimexMessageHandler
 
-// Add additional properties as required
-case class AppService(
-    server: Server
+case class AppService[F[_]](
+    server: Server,
+    rmqHandler: Vector[SimexMessageHandler[F]],
+    rmqClient: RabbitClient[F],
+    channel: AMQPChannel
 )
