@@ -1,4 +1,5 @@
 package simex.collectionpoint.domain.caching
+
 import simex.caching.CachingServiceAlgebra
 import simex.messaging.Simex
 

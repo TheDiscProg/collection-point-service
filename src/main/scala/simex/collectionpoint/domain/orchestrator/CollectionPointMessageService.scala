@@ -1,11 +1,12 @@
 package simex.collectionpoint.domain.orchestrator
+
 import cats.Monad
+import cats.syntax.all._
 import org.typelevel.log4cats.Logger
+import shareprice.entity.SimexSecurity
+import simex.caching.CachingServiceAlgebra
 import simex.collectionpoint.domain.caching.ResponseCachingServiceAlgebra
 import simex.messaging.{Security, Simex}
-import cats.syntax.all._
-import shareprice.entity.EntitySecurity
-import simex.caching.CachingServiceAlgebra
 
 class CollectionPointMessageService[F[_]: Monad: Logger](
     responseCachingService: ResponseCachingServiceAlgebra[F],
@@ -14,7 +15,9 @@ class CollectionPointMessageService[F[_]: Monad: Logger](
 
   override def handleSimexMessage(message: Simex): F[Unit] =
     for {
-      _ <- Logger[F].info(s"CollectionPointHandler: Received message: ${message.endpoint.entity}")
+      _ <- Logger[F].info(
+        s"CollectionPointHandler: Received message for entity: ${message.endpoint.entity}"
+      )
       key = s"${message.originator.clientId}-${message.originator.requestId}"
       _ <- responseCachingService.save(key, message)
     } yield ()
@@ -22,16 +25,23 @@ class CollectionPointMessageService[F[_]: Monad: Logger](
   override def getResponse(request: Simex): F[Option[Simex]] =
     for {
       savedMessage <- responseCachingService.getResponse(request)
+      _ <- Logger[F].info(
+        s"CollectionPointMessageService: Response for [${request.client.clientId}-${request.client.requestId}] exists: ${savedMessage.isDefined}"
+      )
       response <- savedMessage.fold(
         (None: Option[Simex]).pure[F]
       )(msg => checkSecurity(request, msg))
     } yield response
 
   private def checkSecurity(request: Simex, response: Simex): F[Option[Simex]] = {
-    val security: EntitySecurity = EntitySecurity.fromEntity(response.endpoint.entity)
-    security.security match {
-      case Security.BASIC => checkClientId(request, response).pure[F]
-      case Security.AUTHORIZED => checkAuthorizationSecurity(request, response)
+    val responseSecurity = SimexSecurity.getSecurity(response)
+    val requestSecurity = SimexSecurity.getSecurity(request)
+    val security = Security.determineHighestSecurity(responseSecurity, requestSecurity)
+    security match {
+      case Security.BASIC =>
+        checkClientId(request, response).pure[F]
+      case Security.AUTHORIZED =>
+        checkAuthorizationSecurity(request, response)
       case Security.ORIGINAL_TOKEN =>
         for {
           check <- checkAuthorizationSecurity(request, response)

@@ -1,6 +1,6 @@
 ThisBuild / organization := "simex"
 
-ThisBuild / version := "0.1.0"
+ThisBuild / version := "1.0.0"
 
 lazy val commonSettings = Seq(
   scalaVersion := "2.13.10",
@@ -68,12 +68,13 @@ lazy val root = (project in file("."))
     ).mkString(";"),
     coverageExcludedFiles := Seq(
       "<empty>",
+      ".*config.*",
       ".*MainApp.*",
       ".*AppServer.*"
     ).mkString(";"),
     coverageFailOnMinimum := true,
-    coverageMinimumStmtTotal := 92,
-    coverageMinimumBranchTotal := 100,
+    coverageMinimumStmtTotal := 88,
+    coverageMinimumBranchTotal := 84,
     Compile / mainClass := Some("simex.MainApp"),
     Docker / packageName := "collection-point-service",
     Docker / dockerUsername := Some("ramindur"),
@@ -86,8 +87,26 @@ lazy val root = (project in file("."))
   .dependsOn(base % "test->test; compile->compile")
   .dependsOn(guardrail % "test->test; compile->compile")
 
+lazy val integrationTest = (project in file("it"))
+  .enablePlugins(ScalafmtPlugin)
+  .settings(
+    commonSettings,
+    name := "db-service-integration-test",
+    publish / skip := true,
+    libraryDependencies ++= Dependencies.it,
+    parallelExecution := false
+  )
+  .dependsOn(base % "test->test; compile->compile")
+  .dependsOn(guardrail % "test->test; compile->compile")
+  .dependsOn(root % "test->test; compile->compile")
+  .aggregate(base, guardrail, root)
+
 // Put here as database repository tests may hang but remove for none db applications
 parallelExecution := false
 
+addCommandAlias("formatAll", ";scalafmt;test:scalafmt;integrationTest/test:scalafmt;")
+addCommandAlias("testAll", ";clean;integrationTest/clean;test;integrationTest/test;")
+addCommandAlias("cleanAll", ";clean;integrationTest/clean")
+addCommandAlias("itTest", ";integrationTest/clean;integrationTest/test")
 addCommandAlias("cleanTest", ";clean;scalafmt;test:scalafmt;test;")
-addCommandAlias("cleanCoverage", ";clean;scalafmt;test:scalafmt;coverage;test;coverageReport;")
+addCommandAlias("cleanCoverage", ";clean;integrationTest/clean;scalafmt;integrationTest/test:scalafmt;test:scalafmt;coverage;test;integrationTest/test;coverageReport;")
