@@ -140,6 +140,10 @@ components:
         security:
           type: string
           description: the client-defined security level to apply
+        messageTTL:
+          type: integer
+          format: int64
+          description: the optional message TTL
       required:
         - clientId
         - requestId

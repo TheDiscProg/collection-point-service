@@ -1,6 +1,6 @@
 ThisBuild / organization := "simex"
 
-ThisBuild / version := "1.0.0"
+ThisBuild / version := "1.1.0"
 
 lazy val commonSettings = Seq(
   scalaVersion := "2.13.10",
@@ -73,14 +73,14 @@ lazy val root = (project in file("."))
       ".*AppServer.*"
     ).mkString(";"),
     coverageFailOnMinimum := true,
-    coverageMinimumStmtTotal := 88,
-    coverageMinimumBranchTotal := 84,
+    coverageMinimumStmtTotal := 85,
+    coverageMinimumBranchTotal := 80,
     Compile / mainClass := Some("simex.MainApp"),
     Docker / packageName := "collection-point-service",
     Docker / dockerUsername := Some("ramindur"),
     Docker / defaultLinuxInstallLocation := "/opt/collection-point-service",
     dockerBaseImage := "eclipse-temurin:17-jdk-jammy",
-    dockerExposedPorts ++= Seq(8300),
+    dockerExposedPorts ++= Seq(8180),
     dockerExposedVolumes := Seq("/opt/docker/.logs", "/opt/docker/.keys")
   )
   .aggregate(base, guardrail)

@@ -11,12 +11,14 @@ object SimexMessgeTransformer {
     Try {
       request
         .into[Simex]
+        .withFieldComputed(_.originator.messageTTL, r => r.originator.messageTtl)
         .transform
     }.toOption
 
   def transformToResponse(message: Simex): SimexMessage =
     message
       .into[SimexMessage]
+      .withFieldComputed(_.originator.messageTtl, m => m.originator.messageTTL)
       .transform
 
 }

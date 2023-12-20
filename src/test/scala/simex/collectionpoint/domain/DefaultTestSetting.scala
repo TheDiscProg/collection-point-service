@@ -46,7 +46,8 @@ trait DefaultTestSetting extends ScalaFutures {
     requestId = request1,
     sourceEndpoint = "app.auth",
     originalToken = "",
-    security = Security.BASIC.level
+    security = Security.BASIC.level,
+    messageTTL = Some(255L)
   )
 
   val data = Vector(

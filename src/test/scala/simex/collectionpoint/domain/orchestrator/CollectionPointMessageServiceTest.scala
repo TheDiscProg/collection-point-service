@@ -132,7 +132,8 @@ class CollectionPointMessageServiceTest
         requestId = request3,
         sourceEndpoint = "app.data",
         originalToken = "oldtoken",
-        security = "2"
+        security = "2",
+        Some(255)
       ),
       data = Vector()
     )
@@ -164,7 +165,8 @@ class CollectionPointMessageServiceTest
         requestId = request3,
         sourceEndpoint = "app.data",
         originalToken = "oldtoken",
-        security = "2"
+        security = "2",
+        Some(255)
       ),
       data = Vector()
     )
@@ -195,7 +197,8 @@ class CollectionPointMessageServiceTest
         requestId = request3,
         sourceEndpoint = "app.data",
         originalToken = "oldtoken",
-        security = "3"
+        security = "3",
+        Some(255)
       ),
       data = Vector()
     )
@@ -229,7 +232,8 @@ class CollectionPointMessageServiceTest
         requestId = request3,
         sourceEndpoint = "app.data",
         originalToken = "atoken",
-        security = "3"
+        security = "3",
+        Some(255)
       ),
       data = Vector()
     )
